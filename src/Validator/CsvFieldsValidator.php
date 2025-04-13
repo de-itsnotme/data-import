@@ -11,9 +11,12 @@ use RuntimeException;
 
 class CsvFieldsValidator implements FieldsValidatorInterface
 {
+    /** array<string, string> $data */
     public function validate(array $data): void
     {
         $fields = CsvFieldSchema::getFields();
+
+        /** @var array<string, string> $missingFields */
         $missingFields = array_diff($fields, array_keys($data));
 
         $this->allFieldsArePresentValidator($missingFields);
@@ -21,8 +24,7 @@ class CsvFieldsValidator implements FieldsValidatorInterface
     }
 
     /**
-     * @param array $missingFields
-     * @return void
+     * @param array<string, string> $missingFields
      */
     public function allFieldsArePresentValidator(array $missingFields): void
     {
@@ -38,7 +40,7 @@ class CsvFieldsValidator implements FieldsValidatorInterface
         );
     }
 
-    public function allowedLanguageIsPresentValidator($value): void
+    public function allowedLanguageIsPresentValidator(string $value): void
     {
         if (LanguageEnum::tryFrom($value) !== null) {
             return;
