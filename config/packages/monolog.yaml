@@ -1,0 +1,9 @@
+monolog:
+  handlers:
+    main:
+      type: stream
+      path: '%kernel.logs_dir%/%kernel.environment%.log'
+      level: info # Logs notice and higher (e.g., error)
+    console:
+      type: console
+      level: debug

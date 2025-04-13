@@ -1,0 +1,67 @@
+services:
+  php:
+    image: php:8.2-fpm
+    build:
+      context: ./docker/php
+      dockerfile: Dockerfile
+    container_name: php
+    working_dir: /project
+    volumes:
+      - .:/project:delegated
+      - ./docker/php/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
+    ports:
+      - "62653:62653" # XDebug port
+    environment:
+      XDEBUG_MODE: debug
+      XDEBUG_CONFIG: client_host=host.docker.internal
+      DATABASE_URL: "mysql://symfony:symfony@db:3306/symfony"
+    depends_on:
+      - db
+    networks:
+      - mynetwork
+
+  webserver:
+    image: nginx:latest
+    container_name: webserver
+    working_dir: /project
+    volumes:
+      - .:/project:delegated
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "8080:80"
+    depends_on:
+      - php
+    networks:
+      - mynetwork
+
+  db:
+    image: mariadb:10.6
+    container_name: db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: symfony
+      MYSQL_USER: symfony
+      MYSQL_PASSWORD: symfony
+    volumes:
+      - dbdata:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - mynetwork
+
+  composer:
+    image: composer:latest
+    container_name: composer
+    working_dir: /project
+    volumes:
+      - .:/project:delegated
+    entrypoint: ['composer']
+    networks:
+      - mynetwork
+
+volumes:
+  dbdata:
+
+networks:
+  mynetwork:
+    driver: bridge
